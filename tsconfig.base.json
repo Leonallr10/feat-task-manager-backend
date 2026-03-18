@@ -15,7 +15,13 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@task-manager/auth": ["libs/src/index.ts"]
+      "@task-manager/auth": ["libs/src/lib/auth"],
+      "@task-manager/models": ["libs/src/lib/models"],
+      "@task-manager/data-access": ["libs/src/lib/data-access"],
+      "@task-manager/tasks": ["libs/src/lib/tasks"],
+      "@task-manager/users": ["libs/src/lib/users"],
+      "@task-manager/analytics": ["libs/src/lib/analytics"],
+      "@task-manager/utils": ["libs/src/lib/utils"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,17 +1,23 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "module": "commonjs",
     "outDir": "../dist/out-tsc",
     "declaration": true,
     "types": ["node"],
     "target": "es2021",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "strict": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "importHelpers": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true
   },
   "include": ["src/**/*.ts"]
 }
