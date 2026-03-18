@@ -1,103 +1,129 @@
-# TaskManager
+# Task Manager API
 
+Multi-user Task Management API with authentication, role-based access, and analytics — built with **NestJS** in an **Nx monorepo**. Uses **Azure Cosmos DB (Mongo API)** or MongoDB, **JWT + Passport**, and **Docker** for local and deployable setups.
 
+---
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## What’s implemented (and where)
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/nest?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+| Feature | Location |
+|--------|----------|
+| **Auth** – register, login, JWT, guards, roles (USER / ADMIN) | `libs/src/lib/auth/`, `apps/api/src/app/auth.controller.ts` |
+| **Users** – schema, repository, service | `libs/src/lib/users/`, `libs/src/lib/data-access/schemas/user.schema.ts` |
+| **Tasks** – CRUD, owner/admin rules, status filter | `libs/src/lib/tasks/`, `libs/src/lib/data-access/schemas/task.schema.ts` |
+| **Analytics** – per-status counts, avg completion time, per-user counts (admin only) | `libs/src/lib/analytics/` |
+| **Persistence** – Mongoose + Cosmos/Mongo | `libs/src/lib/data-access/` (MongoModule, repositories, schemas) |
+| **Shared** – DTOs, enums, validation pipe, exception filter | `libs/src/lib/models/`, `libs/src/lib/utils/` |
+| **Unit tests** – services, guards | `apps/api/src/*.spec.ts` (e.g. `tasks.service.spec.ts`, `roles.guard.spec.ts`) |
+| **Integration tests** – controllers + HTTP (mocked DB) | `apps/api/src/app/app.integration.spec.ts` |
+| **Docker** – API image + Mongo for local dev | `Dockerfile`, `docker-compose.yml` |
 
-## Run tasks
+**API base:** `http://localhost:3000/api`  
+**Endpoints:** `POST/GET /auth/register`, `/auth/login` · `POST/GET/PUT/DELETE /tasks` · `GET /analytics/tasks` (admin).
 
-To run the dev server for your app, use:
+---
 
-```sh
+## Commands you need
+
+All commands below are run from the **project root** (`task-manager/`).
+
+### 1. Application startup (local, no Docker)
+
+```bash
+# Install dependencies (once)
+npm install
+
+# Optional: set env (or use defaults)
+# Windows (PowerShell):  $env:MONGO_URI = "mongodb://localhost:27017/task-manager"
+# Windows (PowerShell):  $env:JWT_SECRET = "your-secret"
+
+# Start the API (dev server with watch)
+npm start
+# or
 npx nx serve api
 ```
 
-To create a production bundle:
+- API: **http://localhost:3000/api**
+- Ensure MongoDB is running locally on `27017`, or set `MONGO_URI` / `COSMOS_MONGO_URI`.
 
-```sh
+---
+
+### 2. Jest testing
+
+```bash
+# Run all tests (api project)
+npm test
+# or
+npx nx test api
+
+# Run tests with coverage report (≥70% per PRD)
+npm run test:cov
+# or
+npx nx test api --coverage
+```
+
+- Config: `apps/api/jest.config.cts`
+- Unit specs: `apps/api/src/*.spec.ts` (e.g. `tasks.service.spec.ts`, `auth.service.spec.ts`, `roles.guard.spec.ts`).
+- Integration specs: `apps/api/src/app/app.integration.spec.ts`.
+
+---
+
+### 3. Docker (local + deployable image)
+
+```bash
+# Build and run API + Mongo with Docker Compose
+docker-compose up --build
+
+# Run in background
+docker-compose up -d --build
+
+# Stop
+docker-compose down
+```
+
+- API: **http://localhost:3000/api**
+- Mongo: `mongodb://localhost:27017` (or `mongodb://mongo:27017/task-manager` from inside the API container).
+- Image is suitable for deployment (e.g. Azure Container Apps, AKS); override `MONGO_URI`/`COSMOS_MONGO_URI` and `JWT_SECRET` in production.
+
+---
+
+### 4. Build (production bundle)
+
+```bash
+npm run build
+# or
 npx nx build api
 ```
 
-To see all available targets to run for a project, run:
+Output: `dist/apps/api/` (used by Docker and for production runs).
 
-```sh
-npx nx show project api
-```
+---
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## Quick reference
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+| Goal | Command |
+|------|--------|
+| Install deps | `npm install` |
+| Start API (local) | `npm start` or `npx nx serve api` |
+| Run tests | `npm test` or `npx nx test api` |
+| Tests + coverage | `npm run test:cov` or `npx nx test api --coverage` |
+| Run with Docker | `docker-compose up --build` |
+| Production build | `npm run build` or `npx nx build api` |
 
-## Add new projects
+---
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+## Environment variables
 
-Use the plugin's generator to create new projects.
+| Variable | Description | Default (if any) |
+|----------|-------------|-------------------|
+| `MONGO_URI` or `COSMOS_MONGO_URI` | MongoDB / Cosmos (Mongo API) connection string | `mongodb://localhost:27017/task-manager` |
+| `JWT_SECRET` | Secret for signing JWTs | (none; set in production) |
+| `PORT` | HTTP port | `3000` |
 
-To generate a new application, use:
+---
 
-```sh
-npx nx g @nx/nest:app demo
-```
+## Nx workspace
 
-To generate a new library, use:
-
-```sh
-npx nx g @nx/node:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/nest?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
+- **Apps:** `apps/api` (NestJS API).
+- **Libs:** `libs/src/lib/` — auth, models, data-access, tasks, users, analytics, utils.
+- Run `npx nx graph` to view the project graph.
