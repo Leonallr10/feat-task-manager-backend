@@ -5,8 +5,8 @@
   "scripts": {
     "start": "nx serve api",
     "build": "nx build api",
-    "test": "nx test",
-    "test:cov": "nx test api --coverage"
+    "test": "jest --config=apps/api/jest.config.cts",
+    "test:cov": "jest --config=apps/api/jest.config.cts --coverage"
   },
   "private": true,
   "dependencies": {
